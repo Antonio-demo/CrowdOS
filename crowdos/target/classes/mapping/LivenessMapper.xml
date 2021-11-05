@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.LivenessMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.entity.Liveness">
+        <result column="livenessId" jdbcType="INTEGER" property="livenessId" />
+
+        <result column="userId" jdbcType="INTEGER" property="userId" />
+        <result column="taskId" jdbcType="INTEGER" property="taskId" />
+
+        <result column="onlineTime" jdbcType="DATE" property="onlineTime" />
+        <result column="deadlineTime" jdbcType="DATE" property="deadlineTime" />
+
+        <result column="temp" jdbcType="INTEGER" property="temp" />
+
+        <result column="totalWeek" jdbcType="INTEGER" property="total_week" />
+        <result column="totalMouth" jdbcType="INTEGER" property="taskStatus" />
+        <result column="totalYear" jdbcType="INTEGER" property="totalYear" />
+        <result column="total" jdbcType="INTEGER" property="total" />
+
+    </resultMap>
+
+
+
+<!--    ///   20200425      -->
+    <select id="Sel"  parameterType="int" resultType="com.example.entity.Liveness">
+        select * from liveness where livenessId = #{livenessId}
+    </select>
+    <select id="SelByuserId"  parameterType="int" resultType="com.example.entity.Liveness">
+        select * from liveness where userId = #{userId}
+    </select>
+<!--    20200624   -->
+    <select id="SelByOnlineTime"  parameterType="com.example.entity.Liveness" resultType="com.example.entity.Liveness">
+        select * from liveness
+        where
+        onlineTime = #{onlineTime} and userId = #{userId}
+    </select>
+
+
+    <!--       20200525     -->
+    <select id="Enter"  parameterType="Liveness" resultType="com.example.entity.Liveness">
+        select *
+        from liveness
+        where
+        livenessId = #{livenessId}
+    </select>
+
+    <!--      20200525-->
+    <insert id="add_Liveness" parameterType="com.example.entity.Liveness" useGeneratedKeys="true" keyProperty="livenessId">
+        insert into liveness (livenessId,userId,taskId,onlineTime,deadlineTime,temp,totalWeek,totalMouth,totalYear,total)
+        values (#{livenessId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{taskId,jdbcType=INTEGER},
+        #{onlineTime},  #{deadlineTime},
+        #{temp,jdbcType=INTEGER},  #{totalWeek,jdbcType=INTEGER}, #{totalMouth,jdbcType=INTEGER}, #{totalYear,jdbcType=INTEGER},
+        #{total,jdbcType=INTEGER})
+    </insert>
+
+    <!--       20200528 -->
+    <update id="update_Liveness"  parameterType="com.example.entity.Liveness">
+        update liveness SET
+        onlineTime=#{onlineTime},temp=#{temp},totalWeek=#{totalWeek},totalMouth=#{totalMouth},totalYear=#{totalYear}
+        where livenessId=#{livenessId}
+    </update>
+
+<!--      20200702    -->
+    <update id="update_deadlineTime"  parameterType="com.example.entity.Liveness">
+        update liveness SET
+        deadlineTime=#{deadlineTime}
+        where
+        livenessId=#{livenessId} and userId=#{userId}
+    </update>
+
+<!--    // DarenSu   20200824  -->
+    <delete id="delete_Liveness"  parameterType="com.example.entity.Liveness">
+        delete from liveness
+        where
+        userId = #{userId} and total = 0
+    </delete>
+
+    <!--    20201214 Null data prevention-->
+    <delete id="deleteNull"  parameterType="com.example.entity.Liveness">
+        delete from liveness
+        where
+        userId = #{userId} and livenessId=#{livenessId}
+    </delete>
+<!--    20201214 Null data prevention-->
+    <select id="SelALLFromLiveness"  resultType="com.example.entity.Liveness">
+        select *
+        from liveness
+    </select>
+
+
+<!--    //20201214  -->
+    <update id="updateTheLivenessid"   parameterType="com.example.entity.Liveness">
+        update liveness SET
+        livenessId=#{livenessId}
+        where
+        deadlineTime=#{deadlineTime} and userId=#{userId}
+    </update>
+    <!--    //20201214  -->
+    <update id="resetTheLivenessid"   parameterType="com.example.entity.Liveness">
+        alter table liveness AUTO_INCREMENT=#{livenessId};
+    </update>
+
+
+
+
+    <!--test-->
+    <insert id="add_Task" parameterType="com.example.entity.Task" useGeneratedKeys="true" keyProperty="taskId">
+        insert into task (taskId, taskName,postTime, deadLine,userId,userName,coin, describe_task, totalNum,taskStatus,taskKind)
+        values ( #{taskId,jdbcType=INTEGER},
+        #{taskName,jdbcType=VARCHAR},
+        #{postTime},
+        #{deadLine},
+        #{userId,jdbcType=INTEGER},
+        #{userName,jdbcType=VARCHAR},
+        #{coin,jdbcType=FLOAT},
+        #{describe_task,jdbcType=VARCHAR},
+        #{totalNum,jdbcType=INTEGER},
+        #{taskStatus,jdbcType=INTEGER},
+        #{taskKind,jdbcType=INTEGER}
+        )
+    </insert>
+
+
+
+
+
+
+</mapper>
+

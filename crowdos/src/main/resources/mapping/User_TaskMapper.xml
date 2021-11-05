@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.User_TaskMapper">
+
+
+    <resultMap id="BaseResultMap" type="com.example.entity.User_Task">
+        <result column="user_taskId" jdbcType="INTEGER" property="user_taskId" />
+        <result column="userId" jdbcType="INTEGER" property="userId" />
+        <result column="taskId" jdbcType="INTEGER" property="taskId" />
+        <result column="user_taskStatus" jdbcType="INTEGER" property="user_taskStatus" />
+        <result column="content" jdbcType="VARCHAR" property="content" />
+        <result column="image" jdbcType="VARCHAR" property="image" />
+        <result column="type" jdbcType="INTEGER" property="type" />
+    </resultMap>
+
+
+    <!--  2019.7.11 User-task table query function       -->
+    <select id="Sel"  parameterType="int" resultType="com.example.entity.User_Task">
+        select * from user_task where user_taskId = #{user_taskId}
+    </select>
+
+
+    <!-- 2019.7.11   Upload task data to user-task table   -->
+    <insert id="add" parameterType="com.example.entity.User_Task" useGeneratedKeys="true" keyProperty="user_taskId">
+        insert into user_task (user_taskId, userId, taskId, user_taskStatus, content, image, type)
+        values (#{user_taskId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{taskId,jdbcType=INTEGER},
+        #{user_taskStatus,jdbcType=INTEGER}, #{content,jdbcType=VARCHAR}, #{image,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER})
+    </insert>
+
+    <select id="getStatus" parameterType="com.example.entity.User_Task"  resultType="com.example.entity.User_Task">
+        select * from user_task where userId = #{userId} and taskId=#{taskId}
+    </select>
+
+<!--    2019.11.30 Accept the task and change the task status to 1-->
+    <update id="acceptUser_Task" parameterType="com.example.entity.User_Task" >
+        UPDATE user_task SET
+        user_taskStatus = #{user_taskStatus}
+        WHERE userId = #{userId} and taskId = #{taskId}
+    </update>
+
+    <!--    2019-11-30 For testing, if the data is not available, it needs to be added separately-->
+    <select id="SelUser_Task" parameterType="com.example.entity.User_Task"  resultType="com.example.entity.User_Task">
+        select *
+        from user_task
+        where
+        userId = #{userId} and taskId=#{taskId}
+    </select>
+
+
+    <!-- 	2019.7.16  The user-task table is updated. Before, only userId and taskId were only used. Now it is updated,
+	 that is, fill in the content and image behind.  -->
+    <update id="update" parameterType="com.example.entity.User_Task">
+        UPDATE user_task SET
+        user_taskStatus = #{user_taskStatus},
+        content = #{content},
+        image = #{image}
+        WHERE userId = #{userId} and taskId = #{taskId}
+    </update>
+
+    <!--	2019.7.18 View the completion of the task, that is, see how many people are performing the task, as long as
+	 the task is to be counted
+	 Input parameter taskId, return List<user_task> and return List<user>
+	 Query the corresponding user_task class by taskId
+	 Then query the corresponding user class according to the userId in the queried user_task class (mainly the
+	 userName in the user)-->
+    <select id="SelTaskId"  parameterType="INTEGER" resultType="com.example.entity.User_Task">
+        <!--No Remove Duplicates    select *  from user_task where taskId = #{taskId}-->
+        <!--Remove Duplicates-->
+        select *  from user_task where taskId = #{taskId} and (type = 1 or type = 0) and user_taskStatus = 1 group by userId
+    </select>
+    <select id="SelTaskIdForUT"  parameterType="INTEGER" resultType="com.example.entity.User_Task">
+        <!--    select *  from user_task where taskId = #{taskId}-->
+        <!---->
+        select *  from user_task where taskId = #{taskId}
+
+<!--    group by userId-->
+    </select>
+
+
+
+    <!--2019.9.10  Input parameter utask, return a single picture.-->
+    <select id="selcetUser_Task"  parameterType="com.example.entity.User_Task" resultType="com.example.entity.User_Task">
+        select * from user_task where user_taskId = #{user_taskId} and userId = #{userId}
+    </select>
+
+    <!--2019-11-1   According to the user ID transmitted by the front end, return all tasks that this user has received-->
+    <select id="seluserId" parameterType="INTEGER" resultType="com.example.entity.User_Task">
+        select *
+        from user_task
+        where userId = #{userId}
+    </select>
+
+    <!--	2019-11-1   According to the ID of the user transmitted by the front-end, return that the user has received
+            and completed all tasks-->
+    <select id="seluserIdFinish" parameterType="INTEGER" resultType="com.example.entity.User_Task">
+        select *
+        from user_task
+        where   userId = #{userId}
+            and
+                user_taskStatus = ('1')
+<!--            group by taskId-->
+    </select>
+
+    <!--	 2019-11-3   According to the user ID transmitted by the front-end, return all tasks that the user has received
+             but not completed-->
+    <select id="seluserIdUnfinish" parameterType="INTEGER" resultType="com.example.entity.User_Task">
+        select *
+        from user_task
+        where   userId = #{userId}
+        and
+        user_taskStatus = ('0')
+    </select>
+    <!--	 2019-11-1   According to the user ID transmitted by the front-end, the unexecuted tasks that the user is most
+             suitable to accept according to the strategy of the recommendation system are returned (the current nature is
+             random return)-->
+    <select id="seluserIdRandom" parameterType="INTEGER" resultType="com.example.entity.User_Task">
+        select *
+        from user_task
+        employees ORDER BY RAND() LIMIT 5
+
+    </select>
+
+    <!--	 2019-11-3   According to the user ID transmitted by the front end, return the taskId of all tasks that this
+	         user has received-->
+    <select id="seluserIdForTaskId" parameterType="INTEGER" resultType="INTEGER">
+        select taskId
+        from user_task
+        where userId = #{userId} group by taskId
+    </select>
+
+
+</mapper>
+<!--   select *
+        from user_task
+        where
+        user_taskStatus = 0
+        and
+        employees  ORDER BY RAND() LIMIT 5 -->

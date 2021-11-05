@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.Version_UpdatingMapper">
+
+
+    <resultMap id="BaseResultMap" type="com.example.entity.Version_Updating">
+        <result column="versionId" jdbcType="INTEGER" property="versionId" />
+        <result column="versionCode" jdbcType="INTEGER" property="versionCode" />
+        <result column="versionName" jdbcType="VARCHAR" property="versionName" />
+        <result column="versionAddress" jdbcType="VARCHAR" property="versionAddress" />
+        <result column="apkName" jdbcType="VARCHAR" property="apkName" />
+    </resultMap>
+
+    <!--    	2019.10.29  Determine whether an update is needed, enter the current version on the front end, and compare it
+	             with the latest version of the server
+	             If the version number is different, temp is 1, and update is performed. If the version number is the same,
+	             temp is 0, and no update is required.-->
+    <select id="checkForPresence"  resultType="com.example.entity.Version_Updating"  parameterType="INTEGER">
+        select *
+        from version_updating
+        where
+        versionCode <![CDATA[ > ]]> #{versionCode}
+        <!--  The front is the database, the back is the input parameters-->
+        <!--            and versionName <![CDATA[ < ]]> #{versionName} -->
+
+    </select>
+
+
+    <!--2019.11.1 Modification: Return the last piece of data in the database at one time-->
+    <select id="getLastOne"  resultType="com.example.entity.Version_Updating">
+        select *
+        from version_updating
+        order by version_updating.versionId desc limit 0,1
+    </select>
+</mapper>

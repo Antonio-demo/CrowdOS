@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.TaskMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.entity.Task">
+        <result column="taskId" jdbcType="INTEGER" property="taskId" />
+        <result column="taskName" jdbcType="VARCHAR" property="taskName" />
+        <result column="postTime" jdbcType="DATE" property="postTime" />
+        <result column="deadLine" jdbcType="DATE" property="deadLine" />
+        <result column="userId" jdbcType="INTEGER" property="userId" />
+        <result column="userName" jdbcType="VARCHAR" property="userName" />
+        <result column="coin" jdbcType="FLOAT" property="coin" />
+        <result column="describe_task" jdbcType="VARCHAR" property="describe_task" />
+        <result column="totalNum" jdbcType="INTEGER" property="totalNum" />
+        <result column="taskStatus" jdbcType="INTEGER" property="taskStatus" />
+        <result column="taskKind" jdbcType="INTEGER" property="taskKind" />
+        <result column="longitude" jdbcType="FLOAT" property="longitude" />
+        <result column="latitude" jdbcType="FLOAT" property="latitude" />
+        <result column="sensorTypes" jdbcType="VARCHAR" property="sensorTypes" />
+    </resultMap>
+
+
+<!--Adding and querying data in Bean_Task database         2016.6.18-->
+    <insert id="add_Task" parameterType="com.example.entity.Task" useGeneratedKeys="true" keyProperty="taskId">
+        insert into task (taskId, taskName,postTime, deadLine,userId,userName,coin, describe_task, totalNum,taskStatus,taskKind,longitude,latitude,sensorTypes)
+        values ( #{taskId,jdbcType=INTEGER},
+        #{taskName,jdbcType=VARCHAR},
+        #{postTime},
+        #{deadLine},
+        #{userId,jdbcType=INTEGER},
+        #{userName,jdbcType=VARCHAR},
+        #{coin,jdbcType=FLOAT},
+        #{describe_task,jdbcType=VARCHAR},
+        #{totalNum,jdbcType=INTEGER},
+        #{taskStatus,jdbcType=INTEGER},
+        #{taskKind,jdbcType=INTEGER},
+        #{longitude,jdbcType=FLOAT},
+        #{latitude,jdbcType=FLOAT},
+        #{sensorTypes,jdbcType=VARCHAR}
+        )
+    </insert>
+
+
+
+    <!-- 2019.7.2 Modification: Modified from a single result display to multiple result displays    -->
+
+    <select id="SelInfo" parameterType="string" resultType="com.example.entity.Task">
+        select * from task where taskName = #{taskName}
+    </select>
+
+
+    <!--    20210516   The total number of people remaining in the task minus 1 -->
+    <update id="updateTaskTotalNum" parameterType="com.example.entity.Task" >
+        UPDATE task SET
+--      20210516        The front parameter is the database parameter, and the back parameter is the parameter passed in the front segment
+        totalNum = #{totalNum}
+        WHERE userId = #{userId} and taskId = #{taskId}
+    </update>
+<!--       20210516  Find the entire information of the task according to taskId -->
+    <select id="SelTaskFromTaskId" parameterType="int" resultType="com.example.entity.Task">
+        select * from task where taskId = #{taskId}
+    </select>
+
+
+    <!--2019.7.6 Modification: Return the last ten data of the database at one time-->
+    <select id="getTen"  resultType="com.example.entity.Task">
+        select * from task order by task.taskId desc limit 0,10
+    </select>
+<!--    List<Task> getTen() ;   2021.1.11 Modification: Return all data in the database at once-->
+    <select id="getAll"  resultType="com.example.entity.Task">
+        select * from task
+<!--        select * from task order by task.taskId desc limit 0,100-->
+    </select>
+
+
+
+    <!--2019.8.12 Modification: Return the last ten data of the database at one time    -->
+    <select id="getNewTen"  resultType="com.example.entity.Task" parameterType="INTEGER">
+
+    <!--select * from task where taskId in (select top 10 taskId from task where taskId &lt; mintaskId order by id desc-->
+    select *
+    from task
+    where
+    taskId <![CDATA[< ]]> #{mintaskId} and taskId <![CDATA[ > ]]> (#{mintaskId}-'11')
+
+    </select>
+
+    <!--2019.9.11 Return a list of tasks according to the taskId of the task   -->
+    <select id="SelTaskFromKind"  resultType="com.example.entity.Task" parameterType="INTEGER">
+        select * from task where taskKind = #{taskKind} order by task.taskId desc limit 0,10
+    </select>
+
+
+
+
+
+<!--2019.7.18  Function: Query all tasks published by a userId, input parameter: userId, return result: List<task>-->
+    <select id="SelUserId" parameterType="INTEGER" resultType="com.example.entity.Task">
+        select * from task where userId =#{userId}
+    </select>
+
+
+    <select id="Sel_Task" resultMap="BaseResultMap">
+        select * from task where taskId = #{taskId}
+        -- and taskKind = ('2')
+    </select>
+
+
+    <delete id="del_Task" parameterType="com.example.entity.Task">
+        DELETE FROM task WHERE taskId = #{taskId}
+    </delete>
+
+
+    <select id="check_Task" parameterType="com.example.entity.Task" resultType="com.example.entity.Task">
+        SELECT *
+        FROM task
+        WHERE taskName = #{taskName} and userId = #{userId}
+    </select>
+
+
+
+
+    <!--test-->
+    <!--<insert id="insert" parameterType="com.example.entity.User">
+        insert into User (userId, userName, phone,
+        sex)
+        values (#{userid,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR},
+        #{sex,jdbcType=VARCHAR})
+    </insert>
+
+    <insert id="insertSelective" parameterType="com.example.entity.User">
+        insert into User
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userid != null">
+                userId,
+            </if>
+            <if test="username != null">
+                userName,
+            </if>
+            <if test="phone != null">
+                phone,
+            </if>
+            <if test="sex != null">
+                sex,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userid != null">
+                #{userid,jdbcType=INTEGER},
+            </if>
+            <if test="username != null">
+                #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null">
+                #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null">
+                #{sex,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="findAllUser" resultType="com.example.entity.User">
+        select * from User
+    </select>-->
+</mapper>
